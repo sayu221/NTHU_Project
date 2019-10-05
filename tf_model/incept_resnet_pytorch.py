@@ -1,18 +1,54 @@
 import torch
 import torch.nn as nn
 
+class SlimBatchNorm2d(nn.Sequential):
+    def __init__(self, in_ch, bn_epsilon=0.001):
+        super(SlimBatchNorm2d, self).__init__(
+                nn.BatchNorm2d(in_ch, eps=bn_epsilon)
+        )
+
+
 class SlimConv2d(nn.Module):
     def __init__(self, in_ch, out_ch, kernel_size=3, stride=1, padding=1):
         super(SlimConv2d, self).__init__()
         self.slim_conv = nn.Sequential(
                 nn.ReflectionPad2d(padding),
                 nn.Conv2d(in_ch, out_ch, kernel_size, stride),
-                nn.BatchNorm2d(out_ch),
+                SlimBatchNorm2d(out_ch),
                 nn.ReLU()
         )
 
     def forward(self, x):
         return self.slim_conv(x)
+
+
+class SlimConv2dTranspose(nn.Module):
+    def __init__(self, in_ch, out_ch, kernel_size=3, stride=1, padding=1):
+        super(SlimConv2d, self).__init__()
+        self.slim_conv2d_transpose = nn.Sequential(
+                nn.ReflectionPad2d(padding), 
+                nn.ConvTranpose2d(in_ch, out_ch, kernel_size, stride=2),
+                SlimBatchNorm2d(out_ch),
+                nn.ReLU()
+        )
+
+    def forward(self, x):
+        return self.slim_conv_transpose(x)
+
+
+class SlimFullyConnected(nn.Module):
+
+    def __init__(self, in_ch, out_ch, kernel_size=3, stride=1, padding=1):
+        super(SlimFullyConnected, self).__init__()
+        self.slim_conv = nn.Sequential(
+                nn.Linear(in_ch, out_ch),
+                nn.BatchNorm2d(out_ch),
+                nn.ReLU()
+        )
+
+    def forward(self, x):
+        return self.slim_fully_connected(x)
+
 
 
 class ConvMaxpool(nn.Module):
@@ -30,11 +66,11 @@ class ConvMaxpool(nn.Module):
 def PullOut8(nn.Module):
     def __init__(self, in_ch, out_ch, kernel_size, stride, padding):
         super(PullOut8, self).__init__()
-        self.conv_maxpool1 = ConvMaxpool()
-        self.conv_maxpool2 = ConvMaxpool()
-        self.conv_maxpool3 = ConvMaxpool()
-        self.conv1 = nn.Conv2d()
-        self.conv2 = nn.Conv2d()
+        self.conv_maxpool1 = ConvMaxpool(in_ch, out_ch)
+        self.conv_maxpool2 = ConvMaxpool(in_ch, out_ch)
+        self.conv_maxpool3 = ConvMaxpool(in_ch, out_ch)
+        self.conv1 = nn.Conv2d(in_ch, out_ch)
+        self.conv2 = nn.Conv2d(in_ch, out_ch)
         self.dropout = nn.Dropout2d(p=0.5)
         self.fc = nn.Linear()
 
