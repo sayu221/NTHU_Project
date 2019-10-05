@@ -16,7 +16,7 @@ class DPN(nn.module):
         self.down3 = SlimConv2d(32, 64, kernel_size, stride=2)
         self.down4 = SlimConv2d(64, 128, kernel_size, stride=2)
 
-        # Transpose do not contains padding
+        # Transpose padding check
         self.up1 = SlimConv2dTranspose(128, 128, kernel_size, stride=2)
         self._p3 = SlimConv2d(64, 128, kernel_size, stride=1)
 
@@ -55,6 +55,7 @@ class DPN(nn.module):
         d4 = self.pad(d3)
         fake_depth = self.sigmoid(d4)
 
+	# Not sure if the return is correct
         return d1, d2, d3, fake_depth
 
 
