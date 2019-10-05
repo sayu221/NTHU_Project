@@ -23,11 +23,10 @@ class SlimConv2d(nn.Module):
 
 
 class SlimConv2dTranspose(nn.Module):
-    def __init__(self, in_ch, out_ch, kernel_size=3, stride=1, padding=1):
+    def __init__(self, in_ch, out_ch, kernel_size=2, stride=2, padding=1):
         super(SlimConv2d, self).__init__()
         self.slim_conv2d_transpose = nn.Sequential(
-                nn.ReflectionPad2d(padding), 
-                nn.ConvTranpose2d(in_ch, out_ch, kernel_size, stride=2),
+                nn.ConvTranpose2d(in_ch, out_ch, kernel_size, stride),
                 SlimBatchNorm2d(out_ch),
                 nn.ReLU()
         )
@@ -48,7 +47,6 @@ class SlimFullyConnected(nn.Module):
 
     def forward(self, x):
         return self.slim_fully_connected(x)
-
 
 
 class ConvMaxpool(nn.Module):
